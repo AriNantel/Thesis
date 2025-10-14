@@ -27,15 +27,24 @@ def draw(G, pos):
 
     # Get the colors from node attributes
     colors = [G.nodes[n]["color"] for n in G.nodes]
-    nx.draw(G, pos=pos, with_labels=True, node_color=colors)
+    # Create labels showing both node name and dryness (rounded to 2 decimals)
+    labels = {n: f"{n}\n{G.nodes[n]['dryness']:.2f}" for n in G.nodes}
+    nx.draw(G, pos=pos, with_labels=True, labels=labels, node_color=colors, edgecolors="black")
     plt.pause(1)
 
 def start_node(G):
     initial_node = list(G.nodes)[0]
     for node in G.nodes:
-        if G.nodes[node]["dryness"] > initial_node["dryness"]:
+        if G.nodes[node]["dryness"] > G.nodes[initial_node]["dryness"]:
             initial_node = node
     return initial_node
+
+def num_burning_neighbors(G, node):
+    count = 0
+    for neighbor in G.neighbors(node):
+        if G.nodes[neighbor]["state"] == "burning":
+            count += 1
+    return count
 
 
 def main():
@@ -52,50 +61,38 @@ def main():
     # Ignite the initial node
     G.nodes[initial_node]["color"] = "red"
     G.nodes[initial_node]["state"] = "burning"
-    burning = [initial_node]
+
+    not_burned = list(G.nodes)
+    not_burned.remove(initial_node)
 
     # While there are still nodes to infect
-    while infected:
-        # List of nodes that have been infected this round
-        infecting = []
+    while not_burned:
+        burned_this_round = []
 
+        for node in not_burned:
+            num_neighbors = len(list(G.neighbors(node)))
+            num_burning = num_burning_neighbors(G, node)
+            
+            
+            if 1 - G.nodes[node]["dryness"] <= num_burning / num_neighbors:
+            
+                # Remove the selected neighbour from the list of available neighbours
+                burned_this_round.append(node)
+
+                
+            else:
+                G.nodes[node]["dryness"] += 0.05 * num_burning
         
-        for node in infected:
-            # For every infected node, if it was able to infect make it infected and change its color
-            if G.nodes[node]["state"] == "infecting":
-                G.nodes[node]["state"] = "infected"
-                G.nodes[node]["color"] = "green"
-
-                # Number of nodes that will be infected
-                K = 1
-
-                # Number of vertices that have been infected this round
-                num_infected = 0
-
-                # Get a list of all the neighbors of the infecting vertex
-                neighbors = list(G.neighbors(node))
-
-                # while we have infected less than K vertices and there are still available neighbours to check
-                while num_infected < K and neighbors:
-
-                    # Select at randome a neighbour to infect
-                    infect = random.choice(neighbors)
-
-                    # Remove the selected neighbour from the list of available neighbours
-                    neighbors.remove(infect)
-
-                    # If the selected node is safe infect it and add it to the list of infecting vertices
-                    if G.nodes[infect]["state"] == "safe":
-                        G.nodes[infect]["state"] = "infecting"
-                        G.nodes[infect]["color"] = "red"
-                        infecting.append(infect)
-                        num_infected += 1
-        # Set the list of infected vertices to the newly infecting nodes
-        infected = infecting
+        for node in burned_this_round:
+            not_burned.remove(node)
+            G.nodes[node]["state"] = "burning"
+            G.nodes[node]["color"] = "red"
+        
         draw(G, pos)
 
     # End interactive mode
     plt.ioff()
     plt.show()
 
+print("Running new algorithm")
 main()
