@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import random
 
 def make_graph():
-    nodes = ["A","B","C","D","E","F"]
+    nodes = ["A","B","C","D","E","F", "G", "H", "I", "J", "K", "L"]
     # Create edges between each vertex and the one next to it
     edges = list(zip(nodes, nodes[1:]))
     G = nx.Graph()
@@ -29,7 +29,7 @@ def draw(G, pos):
     colors = [G.nodes[n]["color"] for n in G.nodes]
     # Create labels showing both node name and dryness (rounded to 2 decimals)
     labels = {n: f"{n}\n{G.nodes[n]['dryness']:.2f}" for n in G.nodes}
-    nx.draw(G, pos=pos, with_labels=True, labels=labels, node_color=colors, edgecolors="black")
+    nx.draw(G, pos=pos, with_labels=True, labels=labels, node_color=colors, edgecolors="black", node_size=1000)
     plt.pause(1)
 
 def start_node(G):
