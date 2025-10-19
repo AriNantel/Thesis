@@ -65,6 +65,8 @@ def main():
     not_burned = list(G.nodes)
     not_burned.remove(initial_node)
 
+    round = 0
+
     # While there are still nodes to infect
     while not_burned:
         burned_this_round = []
@@ -88,7 +90,10 @@ def main():
             G.nodes[node]["state"] = "burning"
             G.nodes[node]["color"] = "red"
         
+        round += 1
+        
         draw(G, pos)
+    print(f"All nodes burned in {round} rounds.")
 
     # End interactive mode
     plt.ioff()
