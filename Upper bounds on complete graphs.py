@@ -12,6 +12,18 @@ def make_graph():
     pos = {node: (i, 0) for i, node in enumerate(nodes)}
     # G = nx.connected_watts_strogatz_graph(15, 2, 0.2, tries=100, seed=None)
 
+def make_complete_graph():
+    nodes = ["A","B","C","D","E","F", "G", "H","I","J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U"]
+    # Create a complete graph
+    G = nx.complete_graph(len(nodes))
+    
+    # Relabel nodes with your custom labels
+    mapping = {i: nodes[i] for i in range(len(nodes))}
+    G = nx.relabel_nodes(G, mapping)
+    
+    # Use circular layout for better visualization of complete graphs
+    pos = nx.circular_layout(G)
+    
     return G, pos
 
 def initiate_nodes(G):
@@ -19,7 +31,7 @@ def initiate_nodes(G):
     for node in G.nodes:
         G.nodes[node]["color"] = "blue"
         G.nodes[node]["state"] = "safe"
-        G.nodes[node]["dryness"] = 0.9
+        G.nodes[node]["dryness"] = 0
     return G
 
 def draw(G, pos):
@@ -51,11 +63,11 @@ def main():
     plt.ion()
     fig = plt.figure()
 
-    G, pos = make_graph()
+    G, pos = make_complete_graph()
     G = initiate_nodes(G)
 
     # Select the dryest vertex as the seed
-    initial_node = list(G.nodes)[4]
+    initial_node = list(G.nodes)[0]
     print(f"Initial node: {initial_node}")
 
     # Ignite the initial node

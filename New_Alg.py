@@ -2,6 +2,9 @@ import networkx as nx
 import matplotlib.pyplot as plt
 import random
 
+# Define the rate at which dryness increases
+RHO = 0.05
+
 def make_graph():
     nodes = ["A","B","C","D","E","F", "G", "H", "I", "J", "K", "L"]
     # Create edges between each vertex and the one next to it
@@ -83,7 +86,7 @@ def main():
 
                 
             else:
-                G.nodes[node]["dryness"] += 0.05 * num_burning
+                G.nodes[node]["dryness"] += RHO * num_burning
         
         for node in burned_this_round:
             not_burned.remove(node)
