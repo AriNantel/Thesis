@@ -17,6 +17,14 @@ def make_graph():
 
     return G, pos
 
+def make_randome_graph():
+    nodes = ["A","B","C","D","E","F", "G", "H", "I", "J", "K", "L"]
+    G = nx.connected_watts_strogatz_graph(len(nodes), 3, 0.3, tries=100, seed=None)
+    mapping = {i: nodes[i] for i in range(len(nodes))}
+    G = nx.relabel_nodes(G, mapping)
+    pos = nx.spring_layout(G)
+    return G, pos
+
 def intital_nodes(G):
     # Colour all the nodes blue and set them as safe
     for node in G.nodes:
@@ -54,7 +62,7 @@ def main():
     plt.ion()
     fig = plt.figure()
 
-    G, pos = make_graph()
+    G, pos = make_randome_graph()
     G = intital_nodes(G)
 
     # Select the dryest vertex as the seed
