@@ -68,7 +68,6 @@ def makegraph():
     
     
     pos = nx.spring_layout(G, seed = 100) #sets location for nodes in the plot for viz, dont bothering changing this 
-    G = intital_nodes(G)
     
     # draw(G, pos)
     return G, pos, graphsize, graphtype
@@ -175,6 +174,7 @@ def generate_adjlist_with_all_edges(G, delimiter=" "):
 def main():
     
     G, pos, graphsize, graphtype = makegraph() #edit these in makegraph()
+    G = intital_nodes(G)
     
     testsnum = 50 #how many tests are we doing rn? can be increased here
     #K = 1 #change this for how many are infected each round 
@@ -195,6 +195,7 @@ def main():
     
     for i in range (testsnum):
          #steps, total, greennum = run_alg(G, pos)
+         G = intital_nodes(G)
          steps = run_alg(G, pos)
          templist = [i, graphsize, graphtype,nx.density(G), steps]
          datadict [i] = templist
