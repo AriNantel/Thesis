@@ -8,7 +8,7 @@ import pandas as pd
 # Define the rate at which dryness increases
 RHO = 0.05
 
-def make_graph():
+'''def make_graph():
     nodes = ["A","B","C","D","E","F", "G", "H", "I", "J", "K", "L"]
     # Create edges between each vertex and the one next to it
     edges = list(zip(nodes, nodes[1:]))
@@ -26,9 +26,9 @@ def make_randome_graph():
     mapping = {i: nodes[i] for i in range(len(nodes))}
     G = nx.relabel_nodes(G, mapping)
     pos = nx.spring_layout(G)
-    return G, pos
+    return G, pos'''
 
-def makegraph():
+def makegraph(choice, parameter):
     #FROM MEGAN BRYSON
     #CHANGE SIZE AND GENERATION MODEL IN HERE!!
     
@@ -36,27 +36,31 @@ def makegraph():
     #set graph size and type. type variable is only used in print/excel output later, not required for the alg to run
     graphsize = 30 #hard coded but you can change it here
 
-    choice = 3 #this is hard coded to use option 3, you can change this and also add different generation models from the ones networks has. the only thing is for the excel output you will probably want to set the type variables.
+    #choice = 3 #this is hard coded to use option 3, you can change this and also add different generation models from the ones networks has. the only thing is for the excel output you will probably want to set the type variables.
     #for graphs that arent always connected, you can set while loop to make them always connected IF YOU WANT
     if choice == 1:
         graphtype = "watts strogatz"
-        G = nx.connected_watts_strogatz_graph(graphsize, 3, 0.2, seed=None)
+        #parameter = 0.2
+        G = nx.connected_watts_strogatz_graph(graphsize, 9, parameter, seed=None)
         
     elif choice == 2:
          graphtype = "pa barbasi albert"
-         G = nx.barabasi_albert_graph(graphsize, graphsize//5)
+         #parameter = graphsize//5
+         G = nx.barabasi_albert_graph(graphsize, parameter)
          while nx.is_connected(G) == False:
-             G = nx.barabasi_albert_graph(graphsize, graphsize//3)
+             G = nx.barabasi_albert_graph(graphsize, parameter)
     elif choice == 3:
-        graphtype = "erdos renyi gilbert gnp"
-        G = nx.erdos_renyi_graph(graphsize, 0.3)
+        graphtype = "GNP"
+        #parameter = 0.3
+        G = nx.erdos_renyi_graph(graphsize, parameter)
         while nx.is_connected(G) == False:
-            G = nx.erdos_renyi_graph(graphsize, 0.3)
+            G = nx.erdos_renyi_graph(graphsize, parameter)
     else:
         graphtype = "Duplication–Divergence"
-        G = nx.duplication_divergence_graph(graphsize, 0.4)
+        #parameter = 0.4
+        G = nx.duplication_divergence_graph(graphsize, parameter)
         while nx.is_connected(G) == False:
-            G = nx.duplication_divergence_graph(graphsize, 0.4)
+            G = nx.duplication_divergence_graph(graphsize, parameter)
              
   
     for i in range(graphsize):
@@ -65,7 +69,7 @@ def makegraph():
     pos = nx.spring_layout(G, seed = 100) #sets location for nodes in the plot for viz, dont bothering changing this 
     
     # draw(G, pos)
-    return G, pos, graphsize, graphtype
+    return G, pos, graphsize, graphtype, parameter
 
 def intital_nodes(G):
     # Colour all the nodes blue and set them as safe
@@ -104,12 +108,9 @@ def run_alg(G, pos):
     #plt.ion()
     #fig = plt.figure()
 
-    #G, pos = make_randome_graph()
-    #G = intital_nodes(G)
-
     # Select the dryest vertex as the seed
     initial_node = start_node(G)
-    print(f"Initial node: {initial_node}")
+    #print(f"Initial node: {initial_node}")
 
     # Ignite the initial node
     G.nodes[initial_node]["color"] = "red"
@@ -150,52 +151,53 @@ def run_alg(G, pos):
 
 # FROM MEGAN BRYSON'S CODE FOR RUNNING MULTIPLE TESTS AND OUTPUTTING TO EXCEL
 
-def generate_adjlist_with_all_edges(G, delimiter=" "):
+"""def generate_adjlist_with_all_edges(G, delimiter=" "):
     #COMMENT: adj list generator from stackoverflow
     
     for s, nbrs in G.adjacency():
         line = str(s) + delimiter
         for t, data in nbrs.items():
             line += str(t) + delimiter
-        yield line[: -len(delimiter)]
+        yield line[: -len(delimiter)]"""
         
 def main():
     
-    G, pos, graphsize, graphtype = makegraph() #edit these in makegraph()
-    G = intital_nodes(G)
-    
-    testsnum = 50 #how many tests are we doing rn? can be increased here
-    
-    adjlist = []
-    for line in generate_adjlist_with_all_edges(G):
-        tempadj = line.split()
-        adjlist.append(tempadj)
-    print (adjlist)
-    draw(G, pos)
-    
-    datadict = {}
-    datalist =["testnumber", "graphsize", "graphtype","nx.density(G)", "nx,average_clustering(G)", "nx.eccentricity(G,starting_node)","steps"]
-    
-    
-    for i in range (testsnum):
-         #steps, total, greennum = run_alg(G, pos)
-         G = intital_nodes(G)
-         steps,start_node = run_alg(G, pos)
-         templist = [i, graphsize, graphtype,nx.density(G), nx.average_clustering(G), nx.eccentricity(G, start_node), steps]
-         datadict [i] = templist
-         
+    for run_id in range (0,10):
+        G, pos, graphsize, graphtype, parameter = makegraph(4, 0.8) #edit these in makegraph()
+        G = intital_nodes(G)
+        
+        testsnum = 50 #how many tests are we doing rn? can be increased here
+        
+        """adjlist = []
+        for line in generate_adjlist_with_all_edges(G):
+            tempadj = line.split()
+            adjlist.append(tempadj)"""
+        #print (adjlist)
+        draw(G, pos)
+        
+        datadict = {}
+        datalist =["testnumber", "parameter", "graphsize", "graphtype","nx.density(G)", "nx,average_clustering(G)", "nx.eccentricity(G,starting_node)","steps"]
+        
+        
+        for i in range (testsnum):
+            #steps, total, greennum = run_alg(G, pos)
+            G = intital_nodes(G)
+            steps,start_node = run_alg(G, pos)
+            templist = [i, parameter, graphsize, graphtype,nx.density(G), nx.average_clustering(G), nx.eccentricity(G, start_node), steps]
+            datadict [i] = templist
+            
 
-    pf = pd.DataFrame.from_dict(datadict, orient="index", columns= datalist)
-    
-    pf.transpose()
+        pf = pd.DataFrame.from_dict(datadict, orient="index", columns= datalist)
+        
+        pf.transpose()
 
 
-    #name can be changed of the sheets and file
-    with pd.ExcelWriter('Wildfire_Burning_Alg.xlsx', engine='openpyxl', mode='w') as writer: 
-    #with pd.ExcelWriter('Wildfire_Burning_Alg.xlsx', engine='openpyxl', mode='a', if_sheet_exists='new') as writer:  #copilot generated comment: Open an Excel writer in append mode
-        wb = writer.book  #copilot generated comment: Access the Excel workbook object
-        ws = wb.active  #copilot generated comment: Access the active worksheet
-        pf.to_excel(writer, sheet_name= "sample " + graphtype +" tests2" , index=False)  #copilot generated comment: Write the DataFrame to the Excel sheet named "DD"
+        #name can be changed of the sheets and file
+        #with pd.ExcelWriter('Wildfire_Burning_Alg.xlsx', engine='openpyxl', mode='w') as writer: 
+        with pd.ExcelWriter('Wildfire_Burning_Alg.xlsx', engine='openpyxl', mode='a', if_sheet_exists="new") as writer: #copilot generated comment: Open an Excel writer in append mode
+            wb = writer.book  #copilot generated comment: Access the Excel workbook object
+            ws = wb.active  #copilot generated comment: Access the active worksheet
+            pf.to_excel(writer, sheet_name= graphtype + "p" + str(parameter) + "_" + str(run_id), index=False)  #copilot generated comment: Write the DataFrame to the Excel sheet named "DD"
     
 main()
 print("done")
