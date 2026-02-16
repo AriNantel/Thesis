@@ -1,7 +1,6 @@
 import networkx as nx
 import time
 import matplotlib.pyplot as plt
-#from colorama import Fore, Back, Style
 from operator import itemgetter
 import random
 import pandas as pd
@@ -62,10 +61,6 @@ def makegraph():
   
     for i in range(graphsize):
         G.add_node(i)
-        
-    #thing below hard codes a specific graph we were looking at, ignore this    
-    #G.add_edges_from([(0, 2), (0, 24), (0, 43), (0, 49), (1, 2), (1, 3), (1, 49), (2, 3), (2, 11), (3, 4), (3, 5), (3, 43), (4, 6), (4, 36), (5, 6), (5, 7), (6, 7), (6, 8), (7, 8), (7, 9), (8, 9), (8, 10), (9, 10), (9, 11), (10, 12), (10, 18), (11, 12), (11, 13), (11, 25), (12, 13), (12, 14), (13, 14), (13, 15), (14, 15), (14, 16), (15, 16), (15, 17), (16, 17), (16, 18), (16, 48), (17, 19), (17, 46), (18, 20), (18, 47), (19, 20), (19, 21), (20, 21), (20, 32), (21, 22), (21, 23), (22, 23), (22, 24), (23, 24), (23, 25), (24, 25), (25, 26), (26, 27), (26, 28), (27, 28), (27, 29), (28, 29), (28, 30), (29, 30), (29, 31), (30, 31), (30, 32), (31, 32), (31, 33), (32, 33), (32, 34), (33, 34), (33, 35), (34, 35), (34, 36), (35, 36), (35, 37), (36, 37), (36, 38), (37, 38), (37, 39), (38, 39), (38, 40), (39, 40), (39, 41), (40, 41), (40, 42), (41, 42), (41, 43), (42, 43), (42, 44), (43, 45), (44, 46), (44, 47), (45, 46), (45, 47), (46, 47), (46, 48), (47, 48), (47, 49), (48, 49)])
-    
     
     pos = nx.spring_layout(G, seed = 100) #sets location for nodes in the plot for viz, dont bothering changing this 
     
@@ -150,14 +145,7 @@ def run_alg(G, pos):
         
         round += 1
     
-    return round
-        
-        #draw(G, pos)
-    #print(f"All nodes burned in {round} rounds.")
-
-    # End interactive mode
-    #plt.ioff()
-    #plt.show()
+    return round, initial_node
 
 
 # FROM MEGAN BRYSON'S CODE FOR RUNNING MULTIPLE TESTS AND OUTPUTTING TO EXCEL
@@ -177,10 +165,6 @@ def main():
     G = intital_nodes(G)
     
     testsnum = 50 #how many tests are we doing rn? can be increased here
-    #K = 1 #change this for how many are infected each round 
-    #seednum = 1 #how many seeds
-    #seeds = [15] #which node is it seeded at? must be less than the size of the graph so it exists + youll want to put as many seeds in here as you have said there will be in seednum (i didnt do error handling on either of those)
-    
     
     adjlist = []
     for line in generate_adjlist_with_all_edges(G):
@@ -190,17 +174,16 @@ def main():
     draw(G, pos)
     
     datadict = {}
-    datalist =["testnumber", "graphsize", "graphtype","nx.density(G)", "steps"]
+    datalist =["testnumber", "graphsize", "graphtype","nx.density(G)", "nx,average_clustering(G)", "nx.eccentricity(G,starting_node)","steps"]
     
     
     for i in range (testsnum):
          #steps, total, greennum = run_alg(G, pos)
          G = intital_nodes(G)
-         steps = run_alg(G, pos)
-         templist = [i, graphsize, graphtype,nx.density(G), steps]
+         steps,start_node = run_alg(G, pos)
+         templist = [i, graphsize, graphtype,nx.density(G), nx.average_clustering(G), nx.eccentricity(G, start_node), steps]
          datadict [i] = templist
          
-    # print (datadict)
 
     pf = pd.DataFrame.from_dict(datadict, orient="index", columns= datalist)
     
