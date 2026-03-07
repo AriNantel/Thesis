@@ -1,70 +1,79 @@
 import pandas as pd
 import matplotlib.pyplot as plt
-import seaborn as sns
+import numpy as np
+from matplotlib import rcParams
 
-# --- Load your CSV ---
-# Example CSV structure: columns = ['p_or_m', 'steps', 'graph_type']
-df = pd.read_csv("GNP scatter plot - Sheet1.csv")
-
-# --- Set professional plotting style ---
-sns.set(style="whitegrid")  # Clean background
-plt.rcParams.update({
-    "font.size": 12,          # Font size
-    "axes.titlesize": 14,     # Title size
-    "axes.labelsize": 12,     # Axis label size
-    "legend.fontsize": 12,    # Legend size
+# ── Global style ──────────────────────────────────────────────────────────────
+rcParams.update({
+    "font.family": "serif",
+    "font.serif": ["Georgia", "Times New Roman", "DejaVu Serif"],
+    "axes.spines.top": False,
+    "axes.spines.right": False,
+    "axes.linewidth": 1.0,
+    "figure.dpi": 150,
 })
 
-# --- Create scatter plot ---
-plt.figure(figsize=(6,4))  # Width x Height in inches
+# ── Load data ─────────────────────────────────────────────────────────────────
+df = pd.read_excel("Wildfire_Burning_Alg_WS.xlsx", sheet_name="WS K9")
 
-# Example: x = parameter (p or m), y = steps, color = graph type
-sns.scatterplot(
-    data=df,
-    x="Density",
-    y="Steps",
-    hue="p Parameter",      # Different colors for graph types
-    style="p Parameter",    # Different markers for graph types
-    s=80,                  # Marker size
-    palette="deep",        # Color palette
-    edgecolor="k",         # Black border around points
-    alpha=0.8              # Slight transparency
-)
+COL_P = "parameter"
+COL_DENS = "nx.density(G)"
+COL_CLUSTER = "nx,average_clustering(G)"
+COL_ECC = "nx.eccentricity(G,starting_node)"
+COL_STEPS = "steps"
 
-'''sns.regplot(
-    data=df,
-    x="Density",
-    y="Steps",
-    scatter=False,      # don't redraw points
-    color="black",
-    line_kws={"linewidth": 2, "linestyle": "--"}
-) '''   
+for col in [COL_P, COL_DENS, COL_CLUSTER, COL_ECC, COL_STEPS]:
+    df[col] = pd.to_numeric(df[col], errors="coerce")
 
-sns.regplot(
-    data=df,
-    x="Density",
-    y="Steps",
-    scatter=False,
-    logx=True,
-    color="black",
-    line_kws={"linewidth": 2, "linestyle": "--"}
-)
+df = df.dropna()
 
-#plt.xscale("log")
-#plt.yscale("log")
+p = df[COL_P].to_numpy()
+steps = df[COL_STEPS].to_numpy()
 
-# --- Labels and title ---
-plt.xlabel("Density")
-plt.ylabel("Number of Steps")
-plt.title("G(n,p): Density vs Steps")
+def make_plot(x, xlabel, title):
 
-# Optional: grid and layout
-plt.grid(True, linestyle="--", alpha=0.5)
-plt.tight_layout()
+    fig, ax = plt.subplots(figsize=(7,4.2))
 
-# --- Save figure as vector graphic ---
-plt.savefig("scatter_plot.pdf")  # PDF for crisp LaTeX
-plt.savefig("scatter_plot.png", dpi=300)  # High-res PNG if needed
+    ax.set_axisbelow(True)
+    ax.grid(axis="y", color="#d9d9d9", linewidth=1.0, alpha=0.6)
 
-# --- Show plot ---
-plt.show()
+    sc = ax.scatter(
+        x,
+        steps,
+        c=p,
+        cmap="viridis",
+        s=28,
+        alpha=0.75,
+        edgecolors="white",
+        linewidths=0.3,
+    )
+
+    # log regression
+    mask = x > 0
+    log_x = np.log(x[mask])
+    coeffs = np.polyfit(log_x, steps[mask], 1)
+
+    x_line = np.linspace(min(x), max(x), 300)
+    y_line = coeffs[0] * np.log(x_line) + coeffs[1]
+
+    ax.plot(x_line, y_line, color="black", linewidth=1.5)
+
+    ax.set_xlabel(xlabel, labelpad=8)
+    ax.set_ylabel("Number of Steps", labelpad=8)
+    ax.set_title(title, pad=10)
+
+    cbar = fig.colorbar(sc, ax=ax, pad=0.03)
+    cbar.set_label(r"$p$", rotation=0, labelpad=12)
+
+    plt.tight_layout()
+    plt.show()
+
+
+# Graph 1
+make_plot(df[COL_DENS].to_numpy(),"Density","Watts-Strogatz (K = 9): Density vs Steps")
+
+# Graph 2
+make_plot(df[COL_CLUSTER].to_numpy(),"Average Clustering","Watts-Strogatz (K = 9): Average Clustering vs Steps")
+
+# Graph 3
+make_plot(df[COL_ECC].to_numpy(),"Eccentricity (Starting Node)","Watts-Strogatz (K = 9): Eccentricity vs Steps")

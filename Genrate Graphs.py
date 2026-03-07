@@ -150,15 +150,6 @@ def run_alg(G, pos):
 
 
 # FROM MEGAN BRYSON'S CODE FOR RUNNING MULTIPLE TESTS AND OUTPUTTING TO EXCEL
-
-"""def generate_adjlist_with_all_edges(G, delimiter=" "):
-    #COMMENT: adj list generator from stackoverflow
-    
-    for s, nbrs in G.adjacency():
-        line = str(s) + delimiter
-        for t, data in nbrs.items():
-            line += str(t) + delimiter
-        yield line[: -len(delimiter)]"""
         
 def main():
     
@@ -168,10 +159,6 @@ def main():
         
         testsnum = 50 #how many tests are we doing rn? can be increased here
         
-        """adjlist = []
-        for line in generate_adjlist_with_all_edges(G):
-            tempadj = line.split()
-            adjlist.append(tempadj)"""
         #print (adjlist)
         draw(G, pos)
         
